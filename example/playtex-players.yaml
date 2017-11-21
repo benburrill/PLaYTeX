@@ -1,0 +1,9 @@
+# This is a rather silly way to do a hello world in a completely
+# self-contained way.
+hello:
+    play: playtex.render.latex:render
+    requires:
+        - {kind: 'literal', value: 'Hello, \LaTeX!'}
+
+mpl:
+    play: mpl

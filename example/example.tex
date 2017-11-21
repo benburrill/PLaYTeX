@@ -1,0 +1,30 @@
+\documentclass{article}
+
+% utf8 doesn't work well with the matplotlib figures, they want to put
+% unicode negative signs, but it seems the utf8 encoding doesn't
+% understand them, but utf8x does.
+\usepackage[utf8x]{inputenc}
+% pgf is required for rendering matplotlib figures
+\usepackage{pgf}
+\usepackage{playtex}
+
+\title{PLaYTeX example}
+\author{Ben Burrill}
+\date{}
+
+\begin{document}
+    \maketitle
+
+    This example document shows the use of PLaYTeX.
+
+    Let's start off with the ``hello'' player from playtex-players.yaml.
+    To use it, we run \verb|\PlaytexLatex{hello}|: \PlaytexLatex{hello}
+
+
+    For something a little more interesting, we can use matplotlib to
+    create charts with \verb|\PlaytexMatplotlib{hello}|:
+
+    \PlaytexMatplotlib{mpl}
+
+    Pretty cool, huh?
+\end{document}

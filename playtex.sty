@@ -1,0 +1,97 @@
+\NeedsTeXFormat{LaTeX2e}[1994/06/01]
+\ProvidesPackage{playtex}[2017/11/19]
+
+
+% Public API:
+% Options:
+%   cache: {always, never, draft}
+%   playerfile: path to the yaml file describing the players
+%   encoding: any encoding Python knows
+%
+% Playtex, PlaytexRender{renderer}{player}:
+%   Render the object from player with renderer
+%   The arguments correspond to the renderer and player-name of the
+%   playtex-renderer cli tool distributed with this package.
+% PlaytexLatex{player}:
+%   Render the string from player as LaTeX
+% PlaytexStr, PlaytexText{player}:
+%   Render the string from player as raw text
+% PlaytexRepr{player}:
+%   Render the repr() of the object from player as raw text
+% PlaytexTable{player}:
+%   Render an iterable as a table (not implemented in 0.1.0)
+% PlaytexMatplotlib{player}:
+%   Render a matplotlib figure
+
+
+\RequirePackage{kvoptions}
+\RequirePackage{ifthen}
+\RequirePackage{ifdraft}
+
+\SetupKeyvalOptions{
+    family=playtex,
+    prefix=playtex@
+}
+
+\DeclareStringOption[always]{cache}
+\DeclareStringOption[playtex-players.yaml]{playerfile}
+\DeclareStringOption{encoding}
+\ProcessKeyvalOptions*
+
+\ifx\@empty\playtex@encoding
+    \ifdefined\inputencodingname
+        % Use inputenc encoding if defined, treating utf8x as utf8
+        \ifthenelse{\equal{\inputencodingname}{utf8x}}{
+            \def\playtex@encoding{utf8}
+        }{
+            \def\playtex@encoding{\inputencodingname}
+        }
+    \else
+        \def\playtex@encoding{utf8}
+    \fi
+\fi
+
+\ifthenelse{\equal{\playtex@cache}{always}}{
+    \newcommand{\playtex@cachearg}{--cache}}{
+\ifthenelse{\equal{\playtex@cache}{never}}{
+    \newcommand{\playtex@cachearg}{--no-cache}}{
+\ifthenelse{\equal{\playtex@cache}{draft}}{
+    \ifdraft{
+        \newcommand{\playtex@cachearg}{--cache}
+    }{
+        \newcommand{\playtex@cachearg}{--no-cache}
+    }
+}{\errmessage{cache must be always, never, or draft}}}}
+
+\newcommand{\PlaytexRender}[2]{%
+    \input{%
+        |"playtex-render #1 #2 --encoding=\playtex@encoding \space %
+        --player-file=\playtex@playerfile \space \playtex@cachearg"%
+    }%
+}
+
+\newcommand{\Playtex}[2]{\PlaytexRender{#1}{#2}}
+
+\newcommand{\PlaytexLatex}[1]{
+    \PlaytexRender{playtex.render.latex}{#1}
+}
+
+\newcommand{\PlaytexStr}[1]{
+    \PlaytexRender{playtex.render.str}{#1}
+}
+
+\newcommand{\PlaytexText}[1]{\PlaytexStr{#1}}
+
+\newcommand{\PlaytexRepr}[1]{
+    \PlaytexRender{playtex.render.repr}{#1}
+}
+
+\newcommand{\PlaytexTable}[1]{
+    \PlaytexRender{playtex.render.table}{#1}
+}
+
+\newcommand{\PlaytexMatplotlib}[1]{
+    \PlaytexRender{playtex.render.matplotlib}{#1}
+}
+
+\endinput
